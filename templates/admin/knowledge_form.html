@@ -1,0 +1,382 @@
+{% extends "base.html" %}
+
+{% block title %}{% if knowledge %}Edit{% else %}Create{% endif %} Knowledge - Admin{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .form-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    .form-header {
+        margin-bottom: 2rem;
+    }
+    
+    .form-header h1 {
+        color: var(--text-primary);
+        margin: 0 0 0.5rem 0;
+    }
+    
+    .form-header p {
+        color: var(--text-secondary);
+        margin: 0;
+    }
+    
+    .form-card {
+        background: var(--white);
+        padding: 2rem;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+    }
+    
+    .form-section h3 {
+        color: var(--accent-green);
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--border-color);
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+    }
+    
+    .form-group.required label::after {
+        content: " *";
+        color: #dc3545;
+        font-weight: 700;
+    }
+    
+    .form-group input[type="text"],
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 1rem;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    
+    .form-group input[type="text"]:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: var(--accent-green);
+        box-shadow: 0 0 0 3px rgba(190, 255, 63, 0.1);
+    }
+    
+    .form-group textarea {
+        resize: vertical;
+        min-height: 150px;
+        font-family: 'Monaco', 'Courier New', monospace;
+    }
+    
+    .help-text {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: 0.3rem;
+        font-style: italic;
+    }
+    
+    .two-column {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .form-actions button,
+    .form-actions a {
+        padding: 0.75rem 2rem;
+        border: none;
+        border-radius: 20px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s;
+    }
+    
+    .btn-submit {
+        background: var(--accent-green);
+        color: var(--accent-dark);
+    }
+    
+    .btn-submit:hover {
+        background: #A8E71F;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(190, 255, 63, 0.3);
+    }
+    
+    .btn-cancel {
+        background: var(--accent-dark);
+        color: var(--white);
+    }
+    
+    .btn-cancel:hover {
+        background: var(--accent-green);
+        color: var(--accent-dark);
+    }
+    
+    .preview-box {
+        background: var(--card-bg);
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+        border-left: 4px solid var(--accent-green);
+    }
+    
+    .preview-box h4 {
+        color: var(--text-primary);
+        margin-top: 0;
+        margin-bottom: 1rem;
+    }
+    
+    .preview-content {
+        background: var(--white);
+        padding: 1rem;
+        border-radius: 6px;
+        max-height: 300px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        border: 1px solid var(--border-color);
+    }
+    
+    .info-box {
+        background: #E3F2FD;
+        border-left: 4px solid #1976D2;
+        padding: 1rem;
+        border-radius: 6px;
+        margin-bottom: 2rem;
+        color: #1565C0;
+    }
+    
+    .status-section {
+        background: var(--card-bg);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+    
+    .status-section label {
+        display: flex;
+        align-items: center;
+        margin: 0;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    
+    .status-section input[type="checkbox"] {
+        margin-right: 0.5rem;
+        cursor: pointer;
+    }
+    
+    @media (max-width: 768px) {
+        .two-column {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .form-actions button,
+        .form-actions a {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container form-container">
+    <div class="form-header">
+        <h1>{% if knowledge %}✎ Edit Knowledge{% else %}+ Create New Knowledge{% endif %}</h1>
+        <p>{% if knowledge %}Update this knowledge entry{% else %}Add a new knowledge entry to your knowledge base{% endif %}</p>
+    </div>
+    
+    <!-- Info Box -->
+    <div class="info-box">
+        <strong>📝 Good Knowledge Practices:</strong>
+        <ul style="margin: 0.5rem 0 0 1.5rem; padding: 0;">
+            <li>Write clear, concise information</li>
+            <li>Organize with meaningful categories</li>
+            <li>Include relevant details and examples</li>
+            <li>Keep information up-to-date</li>
+        </ul>
+    </div>
+    
+    <!-- Form -->
+    <form method="POST" class="form-card">
+        <!-- Basic Information Section -->
+        <div class="form-section">
+            <h3>ℹ️ Basic Information</h3>
+            
+            <div class="two-column">
+                <div class="form-group required">
+                    <label for="title">Title</label>
+                    <input type="text" id="title" name="title" required
+                           value="{{ knowledge.title if knowledge else '' }}"
+                           placeholder="e.g., Company Mission Statement">
+                    <div class="help-text">A brief title for this knowledge entry</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <input type="text" id="category" name="category"
+                           value="{{ knowledge.category if knowledge else '' }}"
+                           placeholder="e.g., Product, Policy, FAQ, Technical">
+                    <div class="help-text">Organize knowledge by category (optional)</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description</label>
+                <input type="text" id="description" name="description"
+                       value="{{ knowledge.description if knowledge else '' }}"
+                       placeholder="Brief summary of this knowledge (max 500 chars)">
+                <div class="help-text">A short summary to help identify this entry</div>
+            </div>
+        </div>
+        
+        <!-- Content Section -->
+        <div class="form-section">
+            <h3>📄 Content</h3>
+            
+            <div class="form-group required">
+                <label for="content">Knowledge Content</label>
+                <textarea id="content" name="content" required
+                          placeholder="Enter detailed content here. This will be used to answer questions about this topic...">{% if knowledge %}{{ knowledge.content }}{% endif %}</textarea>
+                <div class="help-text">
+                    The detailed content of this knowledge entry. Be comprehensive and clear.
+                    This content will be included in AI responses when relevant.
+                </div>
+            </div>
+            
+            <!-- Preview -->
+            <div class="preview-box">
+                <h4>📋 Content Preview</h4>
+                <div class="preview-content" id="previewContent">
+                    {% if knowledge %}{{ knowledge.content }}{% else %}Your content will appear here...{% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Status Section -->
+        {% if knowledge %}
+        <div class="form-section">
+            <h3>⚙️ Status</h3>
+            
+            <div class="status-section">
+                <label for="is_active">
+                    <input type="checkbox" id="is_active" name="is_active" 
+                           {% if knowledge.is_active %}checked{% endif %}>
+                    <span>Active (This knowledge will be used in AI responses)</span>
+                </label>
+                <p style="margin: 0.5rem 0 0 1.5rem; font-size: 0.85rem; color: var(--text-secondary);">
+                    Deactivate to temporarily hide this knowledge without deleting it
+                </p>
+            </div>
+            
+            <div style="background: var(--card-bg); padding: 1rem; border-radius: 8px; font-size: 0.9rem; color: var(--text-secondary);">
+                <strong>📅 Timestamps:</strong><br>
+                Created: {{ knowledge.created_at.strftime('%Y-%m-%d %H:%M:%S') }}<br>
+                Updated: {{ knowledge.updated_at.strftime('%Y-%m-%d %H:%M:%S') }}<br>
+                {% if knowledge.creator %}
+                Created by: {{ knowledge.creator.username }}
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">
+                {% if knowledge %}✓ Update Knowledge{% else %}+ Create Knowledge{% endif %}
+            </button>
+            <a href="{{ url_for('manage_knowledge') }}" class="btn-cancel">Cancel</a>
+        </div>
+    </form>
+    
+    <!-- Tips Section -->
+    <div class="form-card" style="background: #FFFACD; border-left: 4px solid #FFD700;">
+        <h3 style="color: #F57F17; margin-top: 0;">💡 Knowledge Tips</h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
+            <div>
+                <strong>📚 Structure</strong>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-primary);">
+                    Organize information logically with clear headings and bullet points for easier understanding
+                </p>
+            </div>
+            
+            <div>
+                <strong>🎯 Relevance</strong>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-primary);">
+                    Focus on information that's relevant to your business and useful for AI to reference
+                </p>
+            </div>
+            
+            <div>
+                <strong>🔄 Updates</strong>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-primary);">
+                    Regularly review and update knowledge to keep it accurate and current
+                </p>
+            </div>
+            
+            <div>
+                <strong>🏷️ Categories</strong>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-primary);">
+                    Use consistent category names to make knowledge organization more intuitive
+                </p>
+            </div>
+            
+            <div>
+                <strong>🔍 Searchable</strong>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-primary);">
+                    Write descriptive titles and descriptions so knowledge is easy to find
+                </p>
+            </div>
+            
+            <div>
+                <strong>✅ Examples</strong>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-primary);">
+                    Include specific examples and details to make responses more accurate and useful
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Live preview of content
+document.getElementById('content').addEventListener('input', function() {
+    document.getElementById('previewContent').textContent = this.value || 'Your content will appear here...';
+});
+</script>
+{% endblock %}

@@ -1,0 +1,411 @@
+{% extends "base.html" %}
+
+{% block title %}Query Details - AI Research Agent{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .detail-header {
+        background: var(--white);
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        border: 1px solid var(--border-color);
+    }
+    
+    .query-meta {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .meta-item {
+        background: var(--card-bg);
+        padding: 1rem;
+        border-radius: 8px;
+    }
+    
+    .meta-item label {
+        display: block;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+    
+    .meta-item strong {
+        color: var(--text-primary);
+        font-size: 1.1rem;
+    }
+    
+    .response-section {
+        margin-bottom: 2rem;
+    }
+    
+    .response-section h3 {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .response-content {
+        background: var(--card-bg);
+        padding: 1.5rem;
+        border-radius: 8px;
+        border-left: 4px solid var(--accent-green);
+        line-height: 1.8;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+    
+    .response-content code {
+        background: var(--white);
+        padding: 0.2rem 0.4rem;
+        border-radius: 3px;
+        font-family: 'Monaco', 'Courier New', monospace;
+        color: #c7254e;
+    }
+    
+    .response-content pre {
+        background: var(--white);
+        padding: 1rem;
+        border-radius: 6px;
+        overflow-x: auto;
+        border: 1px solid var(--border-color);
+        font-size: 0.9rem;
+    }
+    
+    .tools-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    
+    .tool-badge {
+        background: #E3F2FD;
+        color: #1976D2;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .action-buttons .btn {
+        flex: 1;
+        min-width: 150px;
+    }
+    
+    .error-box {
+        background: #FFCDD2;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border-left: 4px solid #DC3545;
+        color: #C62828;
+    }
+    
+    .loading-box {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-secondary);
+    }
+    
+    .reasoning-toggle {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--accent-green);
+        font-weight: 600;
+        font-size: 0.9rem;
+        padding: 0;
+        display: inline;
+        text-decoration: underline;
+    }
+    
+    .reasoning-toggle:hover {
+        opacity: 0.8;
+    }
+    
+    .reasoning-box {
+        background: #FFFACD;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border-left: 4px solid #FFD700;
+        margin-top: 1rem;
+        font-size: 0.95rem;
+        line-height: 1.7;
+        color: var(--text-primary);
+        display: none;
+        animation: slideDown 0.3s ease-out;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+    
+    .reasoning-box.show {
+        display: block;
+    }
+    
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+        }
+        to {
+            opacity: 1;
+            max-height: 1000px;
+        }
+    }
+    
+    .export-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .export-menu {
+        display: none;
+        position: absolute;
+        background-color: var(--white);
+        min-width: 160px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        padding: 0;
+        z-index: 1;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        overflow: hidden;
+        right: 0;
+        top: 100%;
+        margin-top: 0.5rem;
+    }
+    
+    .export-menu.show {
+        display: block;
+    }
+    
+    .export-menu a {
+        color: var(--text-primary);
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        border-bottom: 1px solid var(--border-color);
+        transition: background-color 0.3s;
+        font-weight: 500;
+    }
+    
+    .export-menu a:last-child {
+        border-bottom: none;
+    }
+    
+    .export-menu a:hover {
+        background-color: var(--card-bg);
+        color: var(--accent-green);
+    }
+    
+    @media (max-width: 768px) {
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .action-buttons .btn {
+            width: 100%;
+            flex: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h1 style="color: var(--text-primary);">Query Details</h1>
+        <a href="{{ url_for('history') }}" class="btn btn-secondary">← Back to History</a>
+    </div>
+    
+    <div class="detail-header">
+        <h2 style="color: var(--text-primary); margin-bottom: 1rem;">{{ query.query_text[:100] }}{% if query.query_text|length > 100 %}...{% endif %}</h2>
+        
+        <div class="query-meta">
+            <div class="meta-item">
+                <label>Task Type</label>
+                <strong class="task-{{ query.task_type }}">{{ query.task_type }}</strong>
+            </div>
+            
+            <div class="meta-item">
+                <label>Status</label>
+                <strong>
+                    {% if query.status == 'completed' %}
+                        <span style="color: #28a745;">✓ Completed</span>
+                    {% elif query.status == 'processing' %}
+                        <span style="color: #F57F17;">⏳ Processing</span>
+                    {% else %}
+                        <span style="color: #DC3545;">✗ Failed</span>
+                    {% endif %}
+                </strong>
+            </div>
+            
+            <div class="meta-item">
+                <label>Created</label>
+                <strong>{{ query.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</strong>
+            </div>
+            
+            {% if query.execution_time %}
+            <div class="meta-item">
+                <label>Execution Time</label>
+                <strong>{{ "%.2f"|format(query.execution_time) }} sec</strong>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Query Text -->
+    <div class="card response-section">
+        <h3>📝 Your Query</h3>
+        <div class="response-content">
+            {{ query.query_text }}
+        </div>
+    </div>
+    
+    <!-- Response -->
+    {% if query.status == 'processing' %}
+    <div class="card response-section">
+        <h3>⏳ Processing Query...</h3>
+        <div class="loading-box">
+            <div class="spinner" style="width: 40px; height: 40px; margin: 0 auto; margin-bottom: 1rem;"></div>
+            <p>Your query is being processed. This page will refresh automatically when complete.</p>
+        </div>
+    </div>
+    
+    <script>
+        setTimeout(() => location.reload(), 3000);
+    </script>
+    
+    {% elif query.status == 'failed' %}
+    <div class="card response-section">
+        <h3>❌ Error</h3>
+        <div class="error-box">
+            {{ query.error_message or 'An unknown error occurred' }}
+        </div>
+    </div>
+    
+    {% elif query.status == 'completed' %}
+    <div class="card response-section">
+        <h3>✅ Response</h3>
+    <div class="response-content">
+    {{ query.response|markdown|safe }}
+    </div>
+    
+    </div>
+    
+    <!-- Reasoning Display -->
+    {% if query.reasoning %}
+    <div class="card response-section">
+        <h3>
+            🧠 AI Reasoning Process
+            <button class="reasoning-toggle" id="reasoningToggle" onclick="toggleReasoning()">
+                <span id="toggleText">Show</span>
+            </button>
+        </h3>
+        <div class="reasoning-box" id="reasoningBox">
+            {{ query.reasoning }}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Tools Used -->
+    {% if query.tools_used %}
+    <div class="card response-section">
+        <h3>🔧 Tools Used</h3>
+        <div class="tools-list">
+            {% for tool in query.tools_used.split(',') %}
+                {% if tool.strip() %}
+                    <div class="tool-badge">{{ tool.strip() }}</div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">✏️ New Query</a>
+        <a href="{{ url_for('history') }}" class="btn btn-secondary">📋 View History</a>
+        <button onclick="copyToClipboard()" class="btn btn-secondary">📋 Copy Response</button>
+        
+        <!-- Export Dropdown -->
+        {% if query.status == 'completed' %}
+        <div class="export-dropdown">
+            <button class="btn btn-secondary" onclick="toggleExportMenu()">
+                📥 Export
+            </button>
+            <div class="export-menu" id="exportMenu">
+                <a href="{{ url_for('export_query', query_id=query.id, format='txt') }}">📄 Export as TXT</a>
+                <a href="{{ url_for('export_query', query_id=query.id, format='pdf') }}">📕 Export as PDF</a>
+                <a href="{{ url_for('export_query', query_id=query.id, format='doc') }}">📗 Export as DOC</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if query.is_comparison_query and query.table_html %}
+    <div class="card response-section">
+        <h3>📊 Comparison Table</h3>
+        <div class="table-container">
+            {{ query.table_html|safe }}
+        </div>
+    </div>
+{% endif %}
+
+<script>
+function toggleReasoning() {
+    const reasoningBox = document.getElementById('reasoningBox');
+    const toggleText = document.getElementById('toggleText');
+    
+    reasoningBox.classList.toggle('show');
+    toggleText.textContent = reasoningBox.classList.contains('show') ? 'Hide' : 'Show';
+}
+
+function toggleExportMenu() {
+    const exportMenu = document.getElementById('exportMenu');
+    exportMenu.classList.toggle('show');
+}
+
+document.addEventListener('click', function(event) {
+    const exportMenu = document.getElementById('exportMenu');
+    const exportDropdown = document.querySelector('.export-dropdown');
+    
+    if (exportDropdown && !exportDropdown.contains(event.target)) {
+        exportMenu.classList.remove('show');
+    }
+});
+
+function copyToClipboard() {
+    const responseContent = document.querySelector('.response-content');
+    if (!responseContent) {
+        alert('No response to copy');
+        return;
+    }
+    
+    const text = responseContent.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Response copied to clipboard! ✓');
+    }).catch(err => {
+        console.error('Failed to copy:', err);
+        alert('Failed to copy');
+    });
+}
+</script>
+{% endblock %}

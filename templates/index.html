@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - AI Research Agent{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .hero {
+        text-align: left;
+        padding: 0;
+        margin-bottom: 2rem;
+    }
+    
+    .hero h1 {
+        font-size: 2.5rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+    }
+    
+    .cta-banner {
+        background: var(--accent-green);
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 3rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 12px rgba(190, 255, 63, 0.2);
+    }
+    
+    .cta-banner .content h2 {
+        color: var(--accent-dark);
+        margin-bottom: 0.5rem;
+        font-size: 1.3rem;
+    }
+    
+    .cta-banner .content p {
+        color: var(--text-secondary);
+        margin: 0;
+    }
+    
+    .cta-banner .btn {
+        background: var(--accent-dark);
+        color: var(--white);
+    }
+    
+    .cta-banner .btn:hover {
+        background: var(--accent-dark);
+        color: var(--accent-green);
+    }
+    
+    .query-form {
+        background: var(--white);
+        padding: 2rem;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        margin-bottom: 3rem;
+    }
+    
+    .query-form h2 {
+        margin-bottom: 1.5rem;
+        color: var(--text-primary);
+    }
+    
+    .query-input-group {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .query-input-group textarea {
+        flex: 1;
+        min-height: 100px;
+    }
+    
+    .query-input-group button {
+        align-self: flex-end;
+        min-width: 140px;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+    
+    .recent-queries {
+        margin-top: 2rem;
+    }
+    
+    .recent-queries h2 {
+        margin-bottom: 1.5rem;
+        color: var(--text-primary);
+    }
+    
+    .query-item {
+        background: var(--white);
+        padding: 1.5rem;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s;
+    }
+    
+    .query-item:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-color: var(--accent-green);
+    }
+    
+    .query-text {
+        flex: 1;
+    }
+    
+    .query-text strong {
+        color: var(--text-primary);
+        display: block;
+        margin-bottom: 0.3rem;
+    }
+    
+    .query-text small {
+        color: var(--text-secondary);
+    }
+    
+    @media (max-width: 768px) {
+        .query-input-group {
+            flex-direction: column;
+        }
+        
+        .query-input-group button {
+            align-self: auto;
+            width: 100%;
+        }
+        
+        .cta-banner {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .cta-banner .content {
+            margin-bottom: 1rem;
+        }
+        
+        .hero h1 {
+            font-size: 1.8rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="hero">
+        <h1>Dashboard</h1>
+    </div>
+    
+    <!-- CTA Banner -->
+    {% if not queries %}
+    <div class="cta-banner">
+        <div class="content">
+            <h2>🚀 Create your first AI Query</h2>
+            <p>Let's build powerful AI research capabilities from the ground up.</p>
+        </div>
+        <button class="btn" onclick="document.querySelector('.query-form').scrollIntoView({behavior: 'smooth'})">Start Creating</button>
+    </div>
+    {% endif %}
+    
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>💬 Total Queries</h3>
+            <div class="stat-number">{{ queries|length if queries else 0 }}</div>
+            <p>Your AI research requests</p>
+        </div>
+        
+        <div class="stat-card">
+            <h3>✅ Completed</h3>
+            <div class="stat-number">{{ queries|selectattr('status', 'equalto', 'completed')|list|length if queries else 0 }}</div>
+            <p>Successfully processed</p>
+        </div>
+        
+        <div class="stat-card">
+            <h3>⏱️ Processing</h3>
+            <div class="stat-number">{{ queries|selectattr('status', 'equalto', 'processing')|list|length if queries else 0 }}</div>
+            <p>Currently in progress</p>
+        </div>
+    </div>
+    
+    <!-- Query Form -->
+    <div class="query-form card">
+        <h2>Execute New Query</h2>
+        
+        <form id="queryForm">
+            <div class="form-group">
+                <label for="query">Enter your query:</label>
+                <div class="query-input-group">
+                    <textarea id="query" name="query" placeholder="Ask anything: code generation, analysis, research, creative writing, problem-solving..." required></textarea>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <span id="submitText">Execute</span>
+                        <span id="submitSpinner" class="spinner" style="display: none; margin-left: 0.5rem;"></span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Recent Queries -->
+    {% if queries %}
+    <div class="recent-queries">
+        <h2>Recent Queries</h2>
+        
+        {% for query in queries %}
+        <div class="query-item">
+            <div class="query-text">
+                <strong>{{ query.query_text[:80] }}{% if query.query_text|length > 80 %}...{% endif %}</strong>
+                <small>
+                    <span class="badge badge-primary">{{ query.task_type }}</span> 
+                    {{ query.created_at.strftime('%Y-%m-%d %H:%M') }}
+                    {% if query.status == 'completed' %}
+                        <span class="status-badge status-completed">✓ Completed</span>
+                    {% elif query.status == 'failed' %}
+                        <span class="status-badge status-failed">✗ Failed</span>
+                    {% else %}
+                        <span class="status-badge status-processing">⏳ Processing</span>
+                    {% endif %}
+                </small>
+            </div>
+            <a href="{{ url_for('view_query', query_id=query.id) }}" class="btn btn-secondary">View</a>
+        </div>
+        {% endfor %}
+        
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="{{ url_for('history') }}" style="color: var(--accent-green); font-weight: 600; text-decoration: none;">View all queries →</a>
+        </p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+document.getElementById('queryForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const query = document.getElementById('query').value.trim();
+    
+    if (!query) {
+        alert('Please enter a query');
+        return;
+    }
+    
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const submitSpinner = document.getElementById('submitSpinner');
+    
+    submitBtn.disabled = true;
+    submitText.style.display = 'none';
+    submitSpinner.style.display = 'inline-block';
+    
+    try {
+        const response = await fetch('/api/execute-query', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ query })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            document.getElementById('query').value = '';
+            
+            // Check status periodically
+            checkQueryStatus(data.query_id);
+            
+            // Redirect to query detail after 1 second
+            setTimeout(() => {
+                window.location.href = `/query/${data.query_id}`;
+            }, 1000);
+        } else {
+            alert('Error: ' + data.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    } finally {
+        submitBtn.disabled = false;
+        submitText.style.display = 'inline';
+        submitSpinner.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Users - Admin Dashboard{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .admin-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .admin-actions a {
+        font-size: 0.85rem;
+        padding: 0.5rem 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1 style="color: var(--text-primary);">Users Management</h1>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+    
+    <div class="card">
+        {% if users.items %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Type</th>
+                    <th>Total Queries</th>
+                    <th>Completed</th>
+                    <th>Failed</th>
+                    <th>Joined</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users.items %}
+                <tr>
+                    <td><strong>{{ user.username }}</strong></td>
+                    <td>
+                        {% if user.is_admin %}
+                            <span class="badge badge-warning">👑 Admin</span>
+                        {% else %}
+                            <span class="badge badge-primary">👤 User</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong>{{ user.queries|list|length }}</strong>
+                    </td>
+                    <td>
+                        {{ user.queries|selectattr('status', 'equalto', 'completed')|list|length }}
+                    </td>
+                    <td>
+                        {{ user.queries|selectattr('status', 'equalto', 'failed')|list|length }}
+                    </td>
+                    <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td>
+                        <div class="admin-actions">
+                            <a href="{{ url_for('admin_user_queries', user_id=user.id) }}" class="btn btn-secondary">📋 Queries</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <!-- Pagination -->
+        {% if users.pages > 1 %}
+        <div class="pagination" style="margin-top: 2rem;">
+            {% if users.prev_num %}
+                <a href="{{ url_for('admin_users', page=users.prev_num) }}">← Previous</a>
+            {% endif %}
+            
+            {% for page_num in users.iter_pages() %}
+                {% if page_num %}
+                    {% if page_num == users.page %}
+                        <span class="active">{{ page_num }}</span>
+                    {% else %}
+                        <a href="{{ url_for('admin_users', page=page_num) }}">{{ page_num }}</a>
+                    {% endif %}
+                {% else %}
+                    <span>...</span>
+                {% endif %}
+            {% endfor %}
+            
+            {% if users.next_num %}
+                <a href="{{ url_for('admin_users', page=users.next_num) }}">Next →</a>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <p style="text-align: center; margin-top: 1.5rem; color: var(--text-secondary);">
+            Total users: <strong>{{ users.total }}</strong>
+        </p>
+        
+        {% else %}
+        <p style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+            No users found.
+        </p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+Flask==2.3.3
+Flask-SQLAlchemy==3.0.5
+SQLAlchemy==2.0.21
+Werkzeug==2.3.7
+python-dotenv==1.0.0
+openai>=1.0.0
+langchain>=0.1.0
+langchain-community>=0.0.30
+langchain-anthropic>=0.1.0
+wikipedia==1.4.0
+pydantic>=2.0.0
+duckduckgo-search>=3.9.0
+reportlab==4.0.4
+python-docx==0.8.11
+requests==2.31.0
+markdown==3.5.1

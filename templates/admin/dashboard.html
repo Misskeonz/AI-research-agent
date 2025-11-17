@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - AI Research Agent{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1 style="color: var(--text-primary);">Admin Dashboard</h1>
+        <div style="display: flex; gap: 1rem;">
+            <a href="{{ url_for('manage_knowledge') }}" class="btn btn-secondary">📚 Manage Knowledge</a>
+            <a href="{{ url_for('manage_company_info') }}" class="btn btn-secondary">📚 Company Knowledge</a>
+            <a href="{{ url_for('admin_users') }}" class="btn btn-secondary">👥 Users</a>
+            <a href="{{ url_for('admin_queries') }}" class="btn btn-secondary">📊 All Queries</a>
+        </div>
+    </div>
+    
+    <!-- Key Metrics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>👥 Total Users</h3>
+            <div class="stat-number">{{ total_users }}</div>
+            <p>Active users in system</p>
+        </div>
+        
+        <div class="stat-card">
+            <h3>💬 Total Queries</h3>
+            <div class="stat-number">{{ total_queries }}</div>
+            <p>All research queries</p>
+        </div>
+        
+        <div class="stat-card">
+            <h3>✅ Completed</h3>
+            <div class="stat-number">{{ completed_queries }}</div>
+            <p>Successfully processed</p>
+        </div>
+        
+        <div class="stat-card">
+            <h3>❌ Failed</h3>
+            <div class="stat-number">{{ failed_queries }}</div>
+            <p>Processing errors</p>
+        </div>
+    </div>
+    
+    <!-- Task Type Breakdown -->
+    <div class="card" style="margin-top: 2rem;">
+        <h2 style="color: var(--text-primary); margin-bottom: 1rem;">📈 Task Type Breakdown</h2>
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+            {% for task_type, count in task_breakdown.items() %}
+            <div style="background: var(--card-bg); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); flex: 1; min-width: 150px;">
+                <div style="font-weight: 600; color: var(--accent-green); margin-bottom: 0.5rem;">{{ task_type }}</div>
+                <div style="font-size: 1.8rem; font-weight: 700; color: var(--text-primary);">{{ count }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Recent Queries -->
+    <div class="card" style="margin-top: 2rem;">
+        <h2 style="color: var(--text-primary); margin-bottom: 1rem;">📝 Recent Queries</h2>
+        
+        {% if recent_queries %}
+        <table>
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Query</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Time</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for query in recent_queries %}
+                <tr>
+                    <td><strong>{{ query.user.username }}</strong></td>
+                    <td>{{ query.query_text[:50] }}{% if query.query_text|length > 50 %}...{% endif %}</td>
+                    <td><span class="badge badge-primary">{{ query.task_type }}</span></td>
+                    <td>
+                        <span class="status-badge status-{{ query.status }}">
+                            {% if query.status == 'completed' %}
+                                ✓ Completed
+                            {% elif query.status == 'processing' %}
+                                ⏳ Processing
+                            {% else %}
+                                ✗ Failed
+                            {% endif %}
+                        </span>
+                    </td>
+                    <td>{{ query.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        <a href="{{ url_for('admin_user_queries', user_id=query.user_id) }}" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.5rem 1rem;">View All</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="text-align: center; color: var(--text-secondary); padding: 2rem;">No queries yet</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Update stats periodically
+    setInterval(function() {
+        location.reload();
+    }, 30000); // Refresh every 30 seconds
+</script>
+{% endblock %}

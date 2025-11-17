@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparison Table Generation Demo</title>
+    <style>
+        :root {
+            --bg-primary: #DDD8CA;
+            --accent-green: #BEFF3F;
+            --text-primary: #2a2a2a;
+            --text-secondary: #666;
+            --card-bg: #F5F3ED;
+            --border-color: #E8E4D4;
+            --white: #ffffff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+        
+        .demo-section {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+        
+        .demo-section h2 {
+            color: var(--accent-green);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .query-box {
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--accent-green);
+        }
+        
+        .query-box strong {
+            color: var(--text-primary);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .query-text {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid var(--border-color);
+            background: var(--white);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin: 1rem 0;
+        }
+        
+        table thead {
+            background: var(--accent-green);
+            color: #1a1a1a;
+        }
+        
+        table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 700;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        table tbody tr:nth-child(odd) {
+            background: var(--card-bg);
+        }
+        
+        table tbody tr:nth-child(even) {
+            background: var(--white);
+        }
+        
+        table tbody tr:hover {
+            background: #FFFACD;
+        }
+        
+        .detection-info {
+            background: #E3F2FD;
+            border-left: 4px solid #1976D2;
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+            color: #1565C0;
+        }
+        
+        .detection-info strong {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .keywords {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+        
+        .keyword-badge {
+            background: #BBDEFB;
+            color: #0D47A1;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .pros-cons-table th:nth-child(3),
+        .pros-cons-table th:nth-child(4),
+        .pros-cons-table th:nth-child(5),
+        .pros-cons-table th:nth-child(6) {
+            background: var(--accent-green);
+        }
+        
+        .tips-box {
+            background: #FFFACD;
+            border-left: 4px solid #FFD700;
+            padding: 1.5rem;
+            border-radius: 6px;
+            margin-top: 2rem;
+        }
+        
+        .tips-box h3 {
+            color: #F57F17;
+            margin-bottom: 1rem;
+        }
+        
+        .tips-box ul {
+            margin-left: 1.5rem;
+        }
+        
+        .tips-box li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .code-block {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin: 1rem 0;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📊 Comparison Table Generation Demo</h1>
+            <p>Automatically generates HTML tables for comparison & difference questions</p>
+        </div>
+        
+        <!-- Example 1: Programming Languages Comparison -->
+        <div class="demo-section">
+            <h2>Example 1: Programming Languages Comparison</h2>
+            
+            <div class="query-box">
+                <strong>Query Detection:</strong>
+                <div class="query-text">"Compare Python and JavaScript"</div>
+            </div>
+            
+            <div class="detection-info">
+                <strong>✅ Detection Result:</strong>
+                Should generate table: YES | Confidence: 95%
+                <div class="keywords">
+                    <span class="keyword-badge">compare</span>
+                </div>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Python</th>
+                        <th>JavaScript</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Execution Type</strong></td>
+                        <td>Interpreted</td>
+                        <td>Interpreted/JIT Compiled</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Primary Use</strong></td>
+                        <td>Backend, Data Science, AI/ML</td>
+                        <td>Frontend, Full-Stack Web Development</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Execution Speed</strong></td>
+                        <td>Medium</td>
+                        <td>Fast</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Learning Curve</strong></td>
+                        <td>Beginner-friendly</td>
+                        <td>Moderate</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Package Manager</strong></td>
+                        <td>pip</td>
+                        <td>npm / yarn</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Community Size</strong></td>
+                        <td>Large & Active</td>
+                        <td>Very Large & Active</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Example 2: Operating Systems -->
+        <div class="demo-section">
+            <h2>Example 2: Operating Systems Comparison</h2>
+            
+            <div class="query-box">
+                <strong>Query Detection:</strong>
+                <div class="query-text">"What's the difference between iOS and Android?"</div>
+            </div>
+            
+            <div class="detection-info">
+                <strong>✅ Detection Result:</strong>
+                Should generate table: YES | Confidence: 98%
+                <div class="keywords">
+                    <span class="keyword-badge">difference</span>
+                    <span class="keyword-badge">between</span>
+                </div>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>iOS</th>
+                        <th>Android</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Developer</strong></td>
+                        <td>Apple Inc.</td>
+                        <td>Google (Linux-based)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Open Source</strong></td>
+                        <td>Closed Source</td>
+                        <td>Open Source</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Device Range</strong></td>
+                        <td>Limited (iPhone, iPad)</td>
+                        <td>Wide variety of manufacturers</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Customization</strong></td>
+                        <td>Limited</td>
+                        <td>Highly Customizable</td>
+                    </tr>
+                    <tr>
+                        <td><strong>App Store</strong></td>
+                        <td>Apple App Store</td>
+                        <td>Google Play Store + Others</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Market Share</strong></td>
+                        <td>~25-30%</td>
+                        <td>~70-75%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Example 3: Pros vs Cons -->
+        <div class="demo-section">
+            <h2>Example 3: Pros & Cons Comparison</h2>
+            
+            <div class="query-box">
+                <strong>Query Detection:</strong>
+                <div class="query-text">"Compare benefits and drawbacks of cloud computing vs on-premise"</div>
+            </div>
+            
+            <div class="detection-info">
+                <strong>✅ Detection Result:</strong>
+                Should generate table: YES | Confidence: 92%
+                <div class="keywords">
+                    <span class="keyword-badge">compare</span>
+                    <span class="keyword-badge">benefits</span>
+                    <span class="keyword-badge">drawbacks</span>
+                    <span class="keyword-badge">vs</span>
+                </div>
+            </div>
+            
+            <table class="pros-cons-table">
+                <thead>
+                    <tr>
+                        <th colspan="2">Cloud Computing</th>
+                        <th colspan="2">On-Premise</th>
+                    </tr>
+                    <tr>
+                        <th>✅ Pros</th>
+                        <th>❌ Cons</th>
+                        <th>✅ Pros</th>
+                        <th>❌ Cons</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>• Scalable on-demand</td>
+                        <td>• Vendor lock-in</td>
+                        <td>• Full control</td>
+                        <td>• High upfront cost</td>
+                    </tr>
+                    <tr>
+                        <td>• Lower upfront cost</td>
+                        <td>• Network dependent</td>
+                        <td>• Custom setup</td>
+                        <td>• Requires IT staff</td>
+                    </tr>
+                    <tr>
+                        <td>• Easy maintenance</td>
+                        <td>• Ongoing subscription</td>
+                        <td>• Data privacy</td>
+                        <td>• Limited scalability</td>
+                    </tr>
+                    <tr>
+                        <td>• Global access</td>
+                        <td>• Limited customization</td>
+                        <td>• No vendor dependency</td>
+                        <td>• Slower innovation</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Example 4: Non-Comparison Query -->
+        <div class="demo-section">
+            <h2>Example 4: Non-Comparison Query (NO TABLE)</h2>
+            
+            <div class="query-box">
+                <strong>Query Detection:</strong>
+                <div class="query-text">"Explain how machine learning works"</div>
+            </div>
+            
+            <div class="detection-info" style="background: #FFEBEE; border-left-color: #DC3545; color: #C62828;">
+                <strong>❌ Detection Result:</strong>
+                Should generate table: NO | Confidence: 5%
+                <div class="keywords">
+                    <span class="keyword-badge" style="background: #FFCDD2; color: #B71C1C;">No comparison keywords detected</span>
+                </div>
+            </div>
+            
+            <p style="color: var(--text-secondary); margin: 1rem 0;">
+                This query does not contain comparison or difference keywords, so no table will be generated.
+                The response will be in regular text format with explanations and examples.
+            </p>
+        </div>
+        
+        <!-- Query Detection Keywords -->
+        <div class="demo-section">
+            <h2>Detected Comparison Keywords</h2>
+            
+            <p>The system recognizes these patterns to generate comparison tables:</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                <div style="background: var(--card-bg); padding: 1rem; border-radius: 6px;">
+                    <strong>Direct Comparisons</strong>
+                    <ul style="margin-left: 1rem; margin-top: 0.5rem; color: var(--text-secondary);">
+                        <li>compare</li>
+                        <li>versus / vs</li>
+                        <li>compared to</li>
+                        <li>contrast</li>
+                    </ul>
+                </div>
+                
+                <div style="background: var(--card-bg); padding: 1rem; border-radius: 6px;">
+                    <strong>Difference Queries</strong>
+                    <ul style="margin-left: 1rem; margin-top: 0.5rem; color: var(--text-secondary);">
+                        <li>difference</li>
+                        <li>different from</li>
+                        <li>distinguish</li>
+                        <li>distinction</li>
+                    </ul>
+                </div>
+                
+                <div style="background: var(--card-bg); padding: 1rem; border-radius: 6px;">
+                    <strong>Similarity Queries</strong>
+                    <ul style="margin-left: 1rem; margin-top: 0.5rem; color: var(--text-secondary);">
+                        <li>similar</li>
+                        <li>similarities</li>
+                        <li>pros and cons</li>
+                        <li>advantages vs disadvantages</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Implementation Tips -->
+        <div class="demo-section">
+            <div class="tips-box">
+                <h3>🎯 Implementation Tips</h3>
+                <ul>
+                    <li><strong>Confidence Threshold:</strong> Adjust from 0.5 (more tables) to 0.8 (fewer, higher-quality tables)</li>
+                    <li><strong>Keywords:</strong> Add more keywords to COMPARISON_KEYWORDS set for custom domains</li>
+                    <li><strong>Styling:</strong> Customize table appearance by modifying CSS in HTMLTableGenerator</li>
+                    <li><strong>Integration:</strong> Add detector to execute_query endpoint before AI processing</li>
+                    <li><strong>Database:</strong> Store comparison detection results for analytics</li>
+                    <li><strong>User Feedback:</strong> Track which tables users find helpful</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Code Example -->
+        <div class="demo-section">
+            <h2>Quick Code Example</h2>
+            
+            <div class="code-block">
+from table_generator import TableDetector
+
+# Detect comparison questions
+detector = TableDetector()
+
+queries = [
+    "Compare Python vs JavaScript",
+    "What's the difference between iOS and Android?",
+    "Explain machine learning"
+]
+
+for query in queries:
+    is_comparison, confidence = detector.detect_comparison_question(query)
+    print(f"{query}")
+    print(f"  → Comparison: {is_comparison}, Confidence: {confidence:.2f}\n")
+            </div>
+            
+            <p style="color: var(--text-secondary); margin-top: 1rem;">
+                Output:
+            </p>
+            
+            <div class="code-block">
+Compare Python vs JavaScript
+  → Comparison: True, Confidence: 0.95
+
+What's the difference between iOS and Android?
+  → Comparison: True, Confidence: 0.98
+
+Explain machine learning
+  → Comparison: False, Confidence: 0.05
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>
+                <strong>Status:</strong> ✅ Ready to integrate into your Flask app<br>
+                <strong>Next Steps:</strong> Copy table_generator.py to your project and follow the integration guide
+            </p>
+        </div>
+    </div>
+</body>
+</html>
