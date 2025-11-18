@@ -495,6 +495,32 @@ def view_query(query_id):
     return render_template('query_detail.html', query=query)
 
 
+@app.route('/query/<int:query_id>/delete', methods=['POST'])
+@login_required
+def delete_query(query_id):
+    """Delete a query"""
+    query = Query.query.get_or_404(query_id)
+    user = User.query.get(session['user_id'])
+    
+    # Check permissions: user can delete their own queries, admin can delete any query
+    if query.user_id != session['user_id'] and not user.is_admin:
+        flash('You do not have permission to delete this query', 'error')
+        return redirect(url_for('history'))
+    
+    query_text = query.query_text[:50]
+    redirect_url = request.referrer or url_for('history')
+    
+    try:
+        db.session.delete(query)
+        db.session.commit()
+        flash(f'Query deleted successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting query: {str(e)}', 'error')
+    
+    return redirect(redirect_url)
+
+
 @app.route('/settings')
 @login_required
 def settings():
@@ -525,6 +551,9 @@ def admin_dashboard():
     # Recent queries
     recent_queries = Query.query.order_by(Query.created_at.desc()).limit(5).all()
     
+    # Recent users
+    recent_users = User.query.order_by(User.created_at.desc()).limit(5).all()
+    
     # Knowledge statistics
     knowledge_total = Knowledge.query.count()
     knowledge_active = Knowledge.query.filter_by(is_active=True).count()
@@ -541,6 +570,7 @@ def admin_dashboard():
         failed_queries=failed_queries,
         task_breakdown=task_breakdown,
         recent_queries=recent_queries,
+        recent_users=recent_users,
         knowledge_total=knowledge_total,
         knowledge_active=knowledge_active,
         company_knowledge_status=company_knowledge_status,
@@ -573,6 +603,40 @@ def admin_user_queries(user_id):
     page = request.args.get('page', 1, type=int)
     queries = Query.query.filter_by(user_id=user_id).order_by(Query.created_at.desc()).paginate(page=page, per_page=10)
     return render_template('admin/user_queries.html', user=user, queries=queries)
+
+
+@app.route('/admin/user/<int:user_id>/delete', methods=['POST'])
+@admin_required
+def delete_user(user_id):
+    """Delete a user and all their associated queries"""
+    # Prevent admin from deleting themselves
+    if user_id == session['user_id']:
+        flash('Cannot delete your own account', 'error')
+        return redirect(url_for('admin_users'))
+    
+    user = User.query.get_or_404(user_id)
+    
+    # Prevent deletion of admin users
+    if user.is_admin:
+        flash('Cannot delete admin users', 'error')
+        return redirect(url_for('admin_users'))
+    
+    username = user.username
+    
+    try:
+        # Delete all queries associated with the user
+        Query.query.filter_by(user_id=user_id).delete()
+        
+        # Delete the user
+        db.session.delete(user)
+        db.session.commit()
+        
+        flash(f'User "{username}" and all their queries have been deleted successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting user: {str(e)}', 'error')
+    
+    return redirect(url_for('admin_users'))
 
 
 # ============================================================
